@@ -66,21 +66,21 @@ const ChatPage = () => {
           onClick={() => navigate('/')}
           className="mr-4"
         >
-          <ArrowLeft className="h-6 w-6" />
+          <ArrowLeft className="h-8 w-8 md:h-10 md:w-10" />
         </Button>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center flex-grow">
           <div 
-            className="w-10 h-10 rounded-full flex items-center justify-center text-white"
+            className="w-12 h-12 rounded-full flex items-center justify-center text-white mr-3"
             style={{ backgroundColor: currentMode.color }}
           >
             {currentMode.icon}
           </div>
-          <h1 className="text-2xl font-bold">{currentMode.name}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">{currentMode.name}</h1>
         </div>
         
         {location && (
-          <div className="ml-auto flex items-center text-sm text-muted-foreground">
+          <div className="ml-auto text-sm text-muted-foreground hidden md:block">
             <span>Location: {location}</span>
           </div>
         )}

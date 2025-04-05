@@ -243,7 +243,9 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
                 }`}
                 style={message.isUser ? {} : { backgroundColor: `${mode.color}20` }}
               >
-                <p className="text-lg">{message.text}</p>
+                <p className="text-xl">
+                  {message.text}
+                </p>
                 <div className={`text-xs mt-1 ${message.isUser ? 'text-primary-foreground' : 'text-muted-foreground'}`}>
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
@@ -265,29 +267,29 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
         </div>
       </ScrollArea>
 
-      <form onSubmit={handleSubmit} className="p-4 border-t flex gap-2">
+      <form onSubmit={handleSubmit} className="p-4 border-t flex gap-3">
         <Button
           type="button"
           variant="outline"
           size="icon"
-          className={`rounded-full ${isListening ? 'bg-red-100' : ''}`}
+          className={`rounded-full w-14 h-14 ${isListening ? 'bg-red-100' : ''}`}
           onClick={toggleListening}
         >
-          {isListening ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+          {isListening ? <MicOff className="h-7 w-7" /> : <Mic className="h-7 w-7" />}
         </Button>
         <Input
           value={input}
           onChange={handleInputChange}
           placeholder="Type your message..."
-          className="text-lg p-6 rounded-full"
+          className="text-xl p-6 rounded-full h-14"
         />
         <Button 
           type="submit" 
           size="icon" 
-          className="rounded-full"
+          className="rounded-full w-14 h-14"
           style={{ backgroundColor: mode.color }}
         >
-          <Send className="h-6 w-6" />
+          <Send className="h-7 w-7" />
         </Button>
       </form>
     </div>
