@@ -3,8 +3,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Mic, MicOff, Send } from "lucide-react";
+import { Mic, MicOff, Send, Volume2, VolumeX } from "lucide-react";
 import { toast } from 'sonner';
+import { Toggle } from "@/components/ui/toggle";
 
 interface Message {
   text: string;
@@ -35,6 +36,9 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [apiKey, setApiKey] = useState<string>('');
+  const [showSpeechOption, setShowSpeechOption] = useState(false);
+  const [useSpeech, setUseSpeech] = useState(true);
+  const [optionTimerId, setOptionTimerId] = useState<NodeJS.Timeout | null>(null);
   
   // Initialize with a welcome message
   useEffect(() => {
@@ -56,11 +60,48 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
       localStorage.setItem('geminiApiKey', defaultApiKey);
       setApiKey(defaultApiKey);
     }
+
+    // Check for speech preference in local storage
+    const storedSpeechPref = localStorage.getItem('useSpeech');
+    if (storedSpeechPref !== null) {
+      setUseSpeech(storedSpeechPref === 'true');
+    }
   }, [mode.name]);
 
   // Auto scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Show speech option when a new response is received
+  useEffect(() => {
+    if (messages.length > 0 && !messages[messages.length - 1].isUser) {
+      // Clear any existing timer
+      if (optionTimerId) {
+        clearTimeout(optionTimerId);
+      }
+      
+      // Show the option
+      setShowSpeechOption(true);
+      
+      // Set a timer to hide it after 5 seconds
+      const timerId = setTimeout(() => {
+        setShowSpeechOption(false);
+      }, 5000);
+      
+      setOptionTimerId(timerId);
+      
+      // If speech is enabled, speak the response
+      if (useSpeech) {
+        speakResponse(messages[messages.length - 1].text);
+      }
+    }
+    
+    return () => {
+      if (optionTimerId) {
+        clearTimeout(optionTimerId);
+      }
+    };
   }, [messages]);
 
   // Speech recognition setup
@@ -100,7 +141,7 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
 
   // Handle speech synthesis
   const speakResponse = (text: string) => {
-    if ('speechSynthesis' in window) {
+    if ('speechSynthesis' in window && useSpeech) {
       const utterance = new SpeechSynthesisUtterance(text);
       
       // Try to get a more natural voice
@@ -118,6 +159,23 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
       utterance.rate = 0.9; // Slightly slower
       utterance.pitch = 1;
       window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const toggleSpeech = () => {
+    const newSpeechValue = !useSpeech;
+    setUseSpeech(newSpeechValue);
+    localStorage.setItem('useSpeech', newSpeechValue.toString());
+    toast.info(`${newSpeechValue ? 'Speech' : 'Text only'} mode activated`);
+    
+    // If turning on speech and there's a recent bot message, speak it
+    if (newSpeechValue && messages.length > 0 && !messages[messages.length - 1].isUser) {
+      speakResponse(messages[messages.length - 1].text);
+    } else if (!newSpeechValue) {
+      // Cancel any ongoing speech
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
     }
   };
 
@@ -212,7 +270,6 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
       };
       
       setMessages(prev => [...prev, assistantMessage]);
-      speakResponse(responseText);
       
     } catch (error) {
       console.error('Error:', error);
@@ -261,6 +318,28 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
                   <div className="w-4 h-4 rounded-full bg-muted-foreground animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                 </div>
               </div>
+            </div>
+          )}
+          {showSpeechOption && !isLoading && messages.length > 0 && !messages[messages.length - 1].isUser && (
+            <div className="flex justify-center my-2">
+              <Toggle
+                pressed={useSpeech}
+                onPressedChange={toggleSpeech}
+                className="rounded-full p-2 h-auto text-xl"
+                aria-label="Toggle speech output"
+              >
+                {useSpeech ? (
+                  <div className="flex items-center gap-2">
+                    <Volume2 className="h-8 w-8" />
+                    <span>Speech On</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <VolumeX className="h-8 w-8" />
+                    <span>Text Only</span>
+                  </div>
+                )}
+              </Toggle>
             </div>
           )}
           <div ref={messagesEndRef} />
