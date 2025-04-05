@@ -21,6 +21,13 @@ interface ChatInterfaceProps {
   onLocationRequest?: () => void;
 }
 
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -43,6 +50,11 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
     const storedApiKey = localStorage.getItem('geminiApiKey');
     if (storedApiKey) {
       setApiKey(storedApiKey);
+    } else {
+      // Set the default API key from your provided value
+      const defaultApiKey = 'AIzaSyD5j3fIDPEsCtJcD0N7HQvkviuQZ';
+      localStorage.setItem('geminiApiKey', defaultApiKey);
+      setApiKey(defaultApiKey);
     }
   }, [mode.name]);
 
@@ -122,18 +134,6 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
     
     if (input.trim() === '') return;
     
-    // Check if API key is present
-    if (!apiKey) {
-      const key = prompt("Please enter your Gemini API Key:");
-      if (key) {
-        localStorage.setItem('geminiApiKey', key);
-        setApiKey(key);
-      } else {
-        toast.error("API key is required to continue");
-        return;
-      }
-    }
-    
     const userMessage = {
       text: input,
       isUser: true,
@@ -145,7 +145,7 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
     setIsLoading(true);
     
     // Check for location request in shopping mode
-    if (mode.name === "Shopping" && 
+    if (mode.name === "Shopping Helper" && 
         (input.toLowerCase().includes("order") || 
          input.toLowerCase().includes("buy") || 
          input.toLowerCase().includes("purchase"))) {
@@ -155,53 +155,64 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
     }
     
     try {
-      // For now, mock the API call
-      setTimeout(() => {
-        // This would be replaced with actual Gemini API call
-        const responseText = generateMockResponse(input, mode.name);
-        
-        const assistantMessage = {
-          text: responseText,
-          isUser: false,
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, assistantMessage]);
-        speakResponse(responseText);
-        setIsLoading(false);
-      }, 1500);
+      // Make actual API call to Gemini
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: mode.systemPrompt + "\n\nUser: " + input }]
+            }
+          ],
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.8,
+            topK: 40,
+            maxOutputTokens: 2048,
+          }
+        })
+      });
       
-      // TODO: Replace with actual Gemini API integration
-      // const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${apiKey}`
-      //   },
-      //   body: JSON.stringify({
-      //     contents: [
-      //       {
-      //         role: "user",
-      //         parts: [{ text: mode.systemPrompt + "\n\nUser: " + input }]
-      //       }
-      //     ],
-      //     safetySettings: [
-      //       {
-      //         category: "HARM_CATEGORY_HARASSMENT",
-      //         threshold: "BLOCK_MEDIUM_AND_ABOVE"
-      //       }
-      //     ],
-      //     generationConfig: {
-      //       temperature: 0.7,
-      //       topP: 0.8,
-      //       topK: 40,
-      //       maxOutputTokens: 2048,
-      //     }
-      //   })
-      // });
+      const data = await response.json();
       
-      // const data = await response.json();
-      // const responseText = data.candidates[0].content.parts[0].text;
+      let responseText = "Sorry, I encountered an error. Please try again later.";
+      
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        responseText = data.candidates[0].content.parts[0].text;
+      } else if (data.error) {
+        console.error('API Error:', data.error);
+        responseText = `Error: ${data.error.message || 'Unknown error occurred'}`;
+        
+        // If API key is invalid, prompt for a new one
+        if (data.error.status === 'INVALID_ARGUMENT' || data.error.status === 'PERMISSION_DENIED') {
+          const newKey = prompt("Your API key seems invalid. Please enter a valid Gemini API Key:");
+          if (newKey) {
+            localStorage.setItem('geminiApiKey', newKey);
+            setApiKey(newKey);
+            toast.info("API key updated. Please try your question again.");
+          }
+        }
+      }
+      
+      const assistantMessage = {
+        text: responseText,
+        isUser: false,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+      speakResponse(responseText);
       
     } catch (error) {
       console.error('Error:', error);
@@ -210,23 +221,8 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
         isUser: false,
         timestamp: new Date()
       }]);
+    } finally {
       setIsLoading(false);
-    }
-  };
-
-  const generateMockResponse = (input: string, modeName: string) => {
-    // Just for demonstration, returns mode-specific responses
-    switch(modeName) {
-      case "Religious":
-        return "In many religious traditions, the concept of mindfulness and being present has deep significance. For example, in the Bhagavad Gita, Lord Krishna advises Arjuna to focus on his actions without attachment to the results. Would you like me to share more about this teaching?";
-      case "Wellness":
-        return "Maintaining good health at any age involves balanced nutrition, regular physical activity, and mental well-being. Have you tried gentle stretching exercises in the morning? Just 5-10 minutes can help improve flexibility and reduce stiffness in your joints.";
-      case "Information":
-        return "That's an interesting question. Based on reliable sources, senior citizens in many countries can access special benefits like healthcare subsidies, transportation discounts, and tax benefits. Would you like me to provide more specific information about programs available in your region?";
-      case "Shopping":
-        return "I'd be happy to help you place an order. To proceed, I'll need to know your delivery address. You can either share your current location or provide a specific address where you'd like your items delivered.";
-      default:
-        return "Thank you for your message. How else can I assist you today?";
     }
   };
 
