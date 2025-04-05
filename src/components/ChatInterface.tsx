@@ -52,7 +52,7 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
       setApiKey(storedApiKey);
     } else {
       // Set the default API key from your provided value
-      const defaultApiKey = 'AIzaSyD5j3fIDPEsCtJcD0N7HQvkviuQZ';
+      const defaultApiKey = 'AIzaSyD5j3fIDPEsCtJcD0N7HQvkviuQZbXlquM';
       localStorage.setItem('geminiApiKey', defaultApiKey);
       setApiKey(defaultApiKey);
     }
@@ -156,7 +156,7 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
     
     try {
       // Make actual API call to Gemini
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -243,10 +243,10 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
                 }`}
                 style={message.isUser ? {} : { backgroundColor: `${mode.color}20` }}
               >
-                <p className="text-xl">
+                <p className="text-2xl">
                   {message.text}
                 </p>
-                <div className={`text-xs mt-1 ${message.isUser ? 'text-primary-foreground' : 'text-muted-foreground'}`}>
+                <div className={`text-sm mt-2 ${message.isUser ? 'text-primary-foreground' : 'text-muted-foreground'}`}>
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
@@ -256,9 +256,9 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
             <div className="flex justify-start">
               <div className="max-w-[80%] rounded-xl p-4 bg-muted">
                 <div className="flex space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-muted-foreground animate-pulse"></div>
-                  <div className="w-3 h-3 rounded-full bg-muted-foreground animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-3 h-3 rounded-full bg-muted-foreground animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                  <div className="w-4 h-4 rounded-full bg-muted-foreground animate-pulse"></div>
+                  <div className="w-4 h-4 rounded-full bg-muted-foreground animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-4 h-4 rounded-full bg-muted-foreground animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                 </div>
               </div>
             </div>
@@ -267,29 +267,29 @@ const ChatInterface = ({ mode, onLocationRequest }: ChatInterfaceProps) => {
         </div>
       </ScrollArea>
 
-      <form onSubmit={handleSubmit} className="p-4 border-t flex gap-3">
+      <form onSubmit={handleSubmit} className="p-4 border-t flex gap-4">
         <Button
           type="button"
           variant="outline"
           size="icon"
-          className={`rounded-full w-14 h-14 ${isListening ? 'bg-red-100' : ''}`}
+          className={`rounded-full w-16 h-16 ${isListening ? 'bg-red-100' : ''}`}
           onClick={toggleListening}
         >
-          {isListening ? <MicOff className="h-7 w-7" /> : <Mic className="h-7 w-7" />}
+          {isListening ? <MicOff className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
         </Button>
         <Input
           value={input}
           onChange={handleInputChange}
           placeholder="Type your message..."
-          className="text-xl p-6 rounded-full h-14"
+          className="text-2xl p-6 rounded-full h-16"
         />
         <Button 
           type="submit" 
           size="icon" 
-          className="rounded-full w-14 h-14"
+          className="rounded-full w-16 h-16"
           style={{ backgroundColor: mode.color }}
         >
-          <Send className="h-7 w-7" />
+          <Send className="h-8 w-8" />
         </Button>
       </form>
     </div>

@@ -57,18 +57,18 @@ const LocationPrompt = ({ isOpen, onClose, onConfirm }: LocationPromptProps) => 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Share your location</DialogTitle>
-          <DialogDescription className="text-lg">
+          <DialogTitle className="text-3xl">Share your location</DialogTitle>
+          <DialogDescription className="text-xl mt-2">
             We need your location to process your order.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4 space-y-6">
+        <div className="py-6 space-y-8">
           <Button 
             onClick={handleShareLocation} 
-            className="w-full senior-friendly-button bg-sahayak-blue"
+            className="w-full text-xl py-6 h-auto senior-friendly-button bg-sahayak-blue"
             disabled={isLoading}
           >
             {isLoading ? "Getting location..." : "Share my current location"}
@@ -76,7 +76,7 @@ const LocationPrompt = ({ isOpen, onClose, onConfirm }: LocationPromptProps) => 
           
           <div className="relative flex items-center">
             <hr className="flex-grow border-t border-gray-300" />
-            <span className="mx-4 text-gray-500">OR</span>
+            <span className="mx-4 text-xl text-gray-500">OR</span>
             <hr className="flex-grow border-t border-gray-300" />
           </div>
           
@@ -85,10 +85,10 @@ const LocationPrompt = ({ isOpen, onClose, onConfirm }: LocationPromptProps) => 
               value={manualAddress}
               onChange={(e) => setManualAddress(e.target.value)}
               placeholder="Enter your address manually"
-              className="text-lg p-6 mb-4"
+              className="text-xl p-6 h-16 mb-6"
             />
             <DialogFooter>
-              <Button type="submit" className="w-full senior-friendly-button bg-sahayak-green">
+              <Button type="submit" className="w-full text-xl py-6 h-auto senior-friendly-button bg-sahayak-green">
                 Confirm address
               </Button>
             </DialogFooter>

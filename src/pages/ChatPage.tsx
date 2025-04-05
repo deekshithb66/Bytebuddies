@@ -23,25 +23,25 @@ const ChatPage = () => {
     religious: {
       name: "Religious Companion",
       color: "#8B5CF6",
-      icon: <Book className="h-6 w-6" />,
+      icon: <Book className="h-8 w-8" />,
       systemPrompt: "You are a religious companion for elderly users. Respond with compassion, wisdom, and respect for all beliefs. Focus on providing religious teachings, stories, and spiritual guidance when asked. Avoid political commentary and respect the user's faith tradition. Keep responses concise and easy to understand for senior citizens."
     },
     wellness: {
       name: "Wellness Guide",
       color: "#34D399",
-      icon: <Heart className="h-6 w-6" />,
+      icon: <Heart className="h-8 w-8" />,
       systemPrompt: "You are a wellness guide for elderly users. Provide gentle, practical health advice, focusing on exercises suitable for seniors, nutrition guidance, and mental wellbeing tips. Never give specific medical diagnoses or replace professional medical advice. Keep responses concise and easy to understand for senior citizens."
     },
     information: {
       name: "Information Assistant",
       color: "#3B82F6",
-      icon: <Info className="h-6 w-6" />,
+      icon: <Info className="h-8 w-8" />,
       systemPrompt: "You are an information assistant for elderly users. Provide clear, factual, and helpful information about government schemes, local resources, technology usage, and general knowledge. Avoid complex jargon and explain concepts in simple terms. Keep responses concise and easy to understand for senior citizens."
     },
     shopping: {
       name: "Shopping Helper",
       color: "#F97316",
-      icon: <ShoppingBag className="h-6 w-6" />,
+      icon: <ShoppingBag className="h-8 w-8" />,
       systemPrompt: "You are a shopping assistant for elderly users. Help them navigate online shopping platforms, place orders for food, groceries, and other essentials. When the user wants to place an order, ask for their location or address. Keep responses concise and easy to understand for senior citizens."
     }
   };
@@ -66,21 +66,21 @@ const ChatPage = () => {
           onClick={() => navigate('/')}
           className="mr-4"
         >
-          <ArrowLeft className="h-8 w-8 md:h-10 md:w-10" />
+          <ArrowLeft className="h-12 w-12 md:h-15 md:w-15" />
         </Button>
         
         <div className="flex items-center justify-center flex-grow">
           <div 
-            className="w-12 h-12 rounded-full flex items-center justify-center text-white mr-3"
+            className="w-14 h-14 rounded-full flex items-center justify-center text-white mr-3"
             style={{ backgroundColor: currentMode.color }}
           >
             {currentMode.icon}
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold">{currentMode.name}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold">{currentMode.name}</h1>
         </div>
         
         {location && (
-          <div className="ml-auto text-sm text-muted-foreground hidden md:block">
+          <div className="ml-auto text-lg text-muted-foreground hidden md:block">
             <span>Location: {location}</span>
           </div>
         )}
